@@ -1,8 +1,14 @@
 module SparsePoly(fromDP, toDP, qrP) where
 import PolyClass
 import Representation
-import Utils hiding(toCanonicalDP)
-import Data.List (foldl')
+
+first :: (a -> a') -> (a, b) -> (a', b)
+first f (a, b) = (f a, b)
+second :: (b -> b') -> (a, b) -> (a, b')
+second f (a, b) = (a, f b)
+
+trd :: (a, b, c) -> c
+trd (_, _, c) = c
 
 -- | fromDP example
 -- >>> fromDP sampleDP
@@ -15,7 +21,7 @@ toDP = P . reverse . foldr go [] . unS where
     go (e, c) acc = c:(replicate (e - length acc) 0) ++ acc
 
 instance Functor SparsePoly where
-    fmap f = S . map (mapsnd f) . unS 
+    fmap f = S . map (second f) . unS 
 
 instance Polynomial SparsePoly where
     zeroP                 = S []
@@ -24,7 +30,7 @@ instance Polynomial SparsePoly where
     evalP  p x            = trd $ foldr (go) (-1, 0, 0) $ unS p where
         go (e, c) (e', x', acc) = (e, x'', acc + c * x'') where
             x'' = x' * x^(e - e') 
-    shiftP n              = S . map (mapfst (+n)) . unS
+    shiftP n              = S . map (first (+n)) . unS
     degree (S ((e, _):_)) = e
     degree (S [])         = -1
 

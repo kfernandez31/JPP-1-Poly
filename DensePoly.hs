@@ -1,7 +1,10 @@
 module DensePoly() where
 import PolyClass
 import Representation
-import Utils(toCanonicalDP)
+import Data.List(dropWhileEnd)
+
+toCanonicalDP :: (Eq a, Num a) => DensePoly a -> DensePoly a
+toCanonicalDP = P . dropWhileEnd (== 0) . unP
 
 instance Functor DensePoly where
     fmap f = P . (map f) . unP
