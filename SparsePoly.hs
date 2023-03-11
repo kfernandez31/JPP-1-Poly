@@ -58,13 +58,13 @@ instance (Eq a, Num a) => Eq (SparsePoly a) where
 -- qrP s t | not(nullP t) = (q, r) iff s == q*t + r && degree r < degree t
 qrP :: (Eq a, Fractional a) => SparsePoly a -> SparsePoly a -> (SparsePoly a, SparsePoly a)
 qrP s (S [])             = error "Division by zero"
-qrP s t@(S ((te, tc):_)) = go (zeroP, s) where 
-    go (q, (S []))  = (q, zeroP)
-    go (q, r@(S((re, rc):r')))
+qrP s t@(S ((te, tc):_)) = go zeroP s where 
+    go q (S [])          = (q, zeroP)
+    go q r@(S((re, rc):r'))
         | re < te   = (q, r) 
         | otherwise = 
-            let w = shiftP (re - te) (constP (rc / tc)) in
-            go (q + w, r - w * t)
+            let s = shiftP (re - te) (constP (rc / tc)) in
+            go (q + s) (r - s * t)
 
 -- | Division example
 -- >>> let x = varP in qrP (x^2 - 1) (x - 1) == ((x + 1), 0)
