@@ -14,7 +14,7 @@ instance Polynomial DensePoly where
     constP c    = if c == 0 then zeroP else P [c]
     varP        = P [0, 1]
     evalP  cs x = foldr (\c acc -> c + x * acc) 0 $ unP cs
-    shiftP n    = P . (replicate n 0 ++) . unP 
+    shiftP n    = toCanonicalDP . P . (replicate n 0 ++) . unP
     degree      = subtract 1 . length . unP . toCanonicalDP
 
 instance (Eq a, Num a) => Num (DensePoly a) where
