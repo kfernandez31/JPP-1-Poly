@@ -59,7 +59,7 @@ prop_mul_canonic_DP p q = is_canonic_DP (p * q)
 prop_sub_canonic_DP p q = is_canonic_DP (p - q)
 prop_neg_canonic_DP p = is_canonic_DP (-p)
 prop_const_canonic_DP c = is_canonic_DP (constP c)
--- prop_shift_canonic_DP n p = is_canonic_DP (shiftP n p) -- TODO: wyslac maila do prowadzacego o ten case
+prop_shift_canonic_DP n p = is_canonic_DP (shiftP n p)
 
 handmade_DP_evalP_0 = TestCase (assertEqual "dp_eval_0" 1 (evalP (P [1, 2, 3]) 0))
 handmade_DP_evalP_1 = TestCase (assertEqual "dp_eval_1" (-2) (evalP (P [-2, 2, 3]) 0))
@@ -78,6 +78,9 @@ handmade_DP_shift_2 = TestCase (assertEqual "dp_shift_2" (P [0, 0, -1, 0, 0, 1])
 
 prop_EvalPlus  :: Int ->  DPI -> DPI -> Property
 prop_EvalPlus x p q = evalP(p + q) x === evalP p x + evalP q x
+
+prop_Fmap_id_DP :: DPI -> Property
+prop_Fmap_id_DP p = p === (fmap id p)
 
 -- SPI
 
@@ -132,6 +135,9 @@ prop_neg_canonic_SP p = is_canonic_SP (-p)
 prop_const_canonic_SP c = is_canonic_SP (constP c)
 prop_shift_canonic_SP n p = is_canonic_SP (shiftP n p)
 
+prop_Fmap_id_SP :: SPI -> Property
+prop_Fmap_id_SP p = p === (fmap id p)
+
 -- conversions
 
 prop_fromToDP :: SPI -> Bool
@@ -159,7 +165,7 @@ prop_const_DP_SP c = constP c === toDP (constP c)
 -- prop_shift_DP_SP :: Int -> DPI -> Property
 -- prop_shift_DP_SP n p = shiftP n p === toDP (shiftP n (fromDP p)) -- TODO: mail do prowadzacego
 prop_shift_DP_SP :: (NonNegative Int) -> DPI -> Property
-prop_shift_DP_SP (NonNegative n) p = shiftP n p === toDP (shiftP n (fromDP p)) -- TODO: mail do prowadzacego
+prop_shift_DP_SP (NonNegative n) p = shiftP n p === toDP (shiftP n (fromDP p))
 
 
 type SPR = SparsePoly Rational
