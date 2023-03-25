@@ -2,6 +2,9 @@ module SparsePoly(fromDP, toDP, qrP) where
 import PolyClass
 import Representation
 
+toCanonicalSP :: (Eq a, Num a) => SparsePoly a -> SparsePoly a
+toCanonicalSP = S . filter ((/= 0) . snd) . unS
+
 first :: (a -> a') -> (a, b) -> (a', b)
 first f (a, b) = (f a, b)
 second :: (b -> b') -> (a, b) -> (a, b')
@@ -49,11 +52,13 @@ instance (Eq a, Num a) => Num (SparsePoly a) where
             if c == 0 then p1'' + p2''
             else S $ (e1,c):(unS $ p1'' + p2'')
         where (p1'', p2'') = (S p1', S p2')
-    (*) (S [])          _      = zeroP
-    (*) (S ((e, c):p')) q      = shiftP e ((*c) <$> q) + ((S p') * q)
+    (*) p q                        = toCanonicalSP $ go p q where
+        go (S [])          _ = zeroP
+        go (S ((e, c):p')) q = 
+            shiftP e ((*c) <$> q) + (go (S p') q)
 
 instance (Eq a, Num a) => Eq (SparsePoly a) where
-    (==) p q = nullP(p-q)
+    (==) p q = nullP (p-q)
 
 -- qrP s t | not(nullP t) = (q, r) iff s == q*t + r && degree r < degree t
 qrP :: (Eq a, Fractional a) => SparsePoly a -> SparsePoly a -> (SparsePoly a, SparsePoly a)
