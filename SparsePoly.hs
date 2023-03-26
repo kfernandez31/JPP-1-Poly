@@ -10,9 +10,6 @@ first f (a, b) = (f a, b)
 second :: (b -> b') -> (a, b) -> (a, b')
 second f (a, b) = (a, f b)
 
-trd :: (a, b, c) -> c
-trd (_, _, c) = c
-
 -- | fromDP example
 -- >>> fromDP sampleDP
 -- S {unS = [(3,1),(0,-1)]}
@@ -30,9 +27,7 @@ instance Polynomial SparsePoly where
     zeroP                 = S []
     constP c              = if c == 0 then zeroP else S [(0,c)]
     varP                  = S [(1,1)]
-    evalP  p x            = trd $ foldr (go) (-1, 0, 0) $ unS p where
-        go (e, c) (e', x', acc) = (e, x'', acc + c * x'') where
-            x'' = x' * x^(e - e') 
+    evalP  p x            = sum [c * x^e | (e, c) <- unS p]
     shiftP n              = S . map (first (+n)) . unS
     degree (S ((e, _):_)) = e
     degree (S [])         = -1

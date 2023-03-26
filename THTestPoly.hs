@@ -102,7 +102,6 @@ prop_ShiftLSP (NonNegative (Small n)) p q = shiftP n p * q === shiftP n (p*q)
 prop_EqSP :: SPI -> SPI -> Property
 prop_EqSP p q = (p == q) === (q == p)
 
-is_canonic_SP :: SPI -> Property
 is_canonic_SP (S []) = True ==> True
 is_canonic_SP (S l) =
   let mapped = map fst l in
@@ -154,6 +153,11 @@ prop_const_DP_SP c = constP c === toDP (constP c)
 prop_shift_DP_SP :: (NonNegative Int) -> DPI -> Property
 prop_shift_DP_SP (NonNegative n) p = shiftP n p === toDP (shiftP n (fromDP p))
 
+prop_eval_DP_SP :: DPI -> Int -> Property
+prop_eval_DP_SP p x = evalP p x === evalP (fromDP p) x
+
+prop_eval_SP_DP :: SPI -> Int -> Property
+prop_eval_SP_DP p x = evalP p x === evalP (toDP p) x
 
 -- Modulo tests
 
@@ -283,6 +287,9 @@ prop_qr2 p (NonZero s) = degree r < degree s where (q,r) = qrP p s
 prop_qr_whole :: SPR -> (NonZero SPR) -> Bool
 prop_qr_whole p (NonZero s) = r == 0 where (q, r) = qrP (p * s) s
 
+prop_qr_canonical :: SPR -> (NonZero SPR) -> Property
+prop_qr_canonical p (NonZero s) = is_canonic_SP q .&&. is_canonic_SP r where (q, r) = qrP p s
+
 writeln :: String -> IO ()
 writeln = putStrLn
 
@@ -332,16 +339,49 @@ handmade_DP_neg_0 = TestCase (assertEqual "dp_neg_0" (P [1, 0, 0, -1]) (-sampleD
 handmade_DP_shift_0 = TestCase (assertEqual "dp_shift_0" (P [-1, 0, 0, 1]) (shiftP 0 sampleDP))
 handmade_DP_shift_1 = TestCase (assertEqual "dp_shift_1" (P [0, -1, 0, 0, 1]) (shiftP 1 sampleDP))
 handmade_DP_shift_2 = TestCase (assertEqual "dp_shift_2" (P [0, 0, -1, 0, 0, 1]) (shiftP 2 sampleDP))
+handmade_DP_degree_0 = TestCase (assertEqual "dp_degree_0" (-1) (degree (P [])))
+handmade_DP_degree_1 = TestCase (assertEqual "dp_degree_1" 0 (degree (P [1])))
+handmade_DP_degree_2 = TestCase (assertEqual "dp_degree_2" 2 (degree (P [1, 2, 3])))
+handmade_DP_degree_non_canonical_0 = TestCase (assertEqual "dp_degree_non_canonical_0" (-1) (degree (P [0, 0])))
+handmade_DP_degree_non_canonical_1 = TestCase (assertEqual "dp_degree_non_canonical_1" 0 (degree (P [1, 0, 0])))
+handmade_DP_degree_non_canonical_2 = TestCase (assertEqual "dp_degree_non_canonical_2" 2 (degree (P [1, 2, 3, 0, 0, 0])))
+handmade_DP_fmap_0 = TestCase (assertEqual "dp_fmap_0" (P [0, 0]) (fmap (+1) (P [-1, -1])))
+handmade_DP_varP_0 = TestCase (assertEqual "dp_varP_0" (P [0, 1]) (varP :: DPI))
+handmade_DP_x_0 = TestCase (assertEqual "dp_x_0" (P [0, 1]) (x :: DPI))
+
+handmade_SP_degree_0 = TestCase (assertEqual "sp_degree_0" (-1) (degree (S [])))
+handmade_SP_degree_1 = TestCase (assertEqual "sp_degree_1" 0 (degree (S [(0, 1)])))
+handmade_SP_degree_2 = TestCase (assertEqual "sp_degree_2" 2 (degree (S [(2, 3), (0, 3)])))
+handmade_SP_fmap_0 = TestCase (assertEqual "sp_fmap_0" (S [(1, 0), (0, 0)]) (fmap (+1) (S [(1, -1), (0, -1)])))
+handmade_SP_varP_0 = TestCase (assertEqual "sp_varP_0" (S [(1, 1)]) (varP :: SPI))
+handmade_SP_x_0 = TestCase (assertEqual "sp_x_0" (S [(1, 1)]) (x :: SPI))
+handmade_SP_evalP_0 = TestCase (assertEqual "sp_eval_0" 150073 (evalP (2*x^3+1*x^2+3*x+7 :: SPI) 42))
 
 
 handmade_tests = TestList [
-  handmade_DP_evalP_0, handmade_DP_evalP_1, handmade_DP_evalP_2, handmade_DP_evalP_3, 
+  handmade_DP_evalP_0, handmade_DP_evalP_1, handmade_DP_evalP_2, handmade_DP_evalP_3,
   handmade_DP_add_0, handmade_DP_add_1, handmade_DP_add_2,
   handmade_DP_mul_0, handmade_DP_mul_1, handmade_DP_mul_2,
   handmade_DP_neg_0,
   handmade_DP_shift_0,
   handmade_DP_shift_1,
-  handmade_DP_shift_2]
+  handmade_DP_shift_2,
+  handmade_DP_degree_0,
+  handmade_DP_degree_1,
+  handmade_DP_degree_2,
+  handmade_DP_degree_non_canonical_0,
+  handmade_DP_degree_non_canonical_1,
+  handmade_DP_degree_non_canonical_2,
+  handmade_DP_fmap_0,
+  handmade_DP_varP_0,
+  handmade_DP_x_0,
+  handmade_SP_degree_0,
+  handmade_SP_degree_1,
+  handmade_SP_degree_2,
+  handmade_SP_fmap_0,
+  handmade_SP_varP_0,
+  handmade_SP_x_0,
+  handmade_SP_evalP_0]
 
 return []
 runTests = do
